@@ -1,0 +1,38 @@
+name:                trello-tui
+version:             0.1.0.0
+synopsis:            TUI for Trello
+license:             MIT
+license-file:        LICENSE
+author:              Author name here
+maintainer:          example@example.com
+category:            Language
+build-type:          Simple
+extra-source-files:  README.md
+cabal-version:       >=1.10
+
+Library
+  ghc-options:        -W
+  exposed-modules:    Types
+  Default-Extensions: OverloadedStrings,
+                      DeriveGeneric
+  build-depends:      base,
+                      brick,
+                      text,
+                      aeson,
+                      optparse-applicative
+  hs-source-dirs:     src
+  default-language:   Haskell2010
+
+executable trello-tui
+  hs-source-dirs:     src
+  ghc-options:        -threaded
+  build-depends:      base,
+                      brick,
+                      text,
+                      aeson,
+                      optparse-applicative,
+                      trello-tui
+  default-language:   Haskell2010
+  main-is:            Main.hs
+  Default-Extensions: OverloadedStrings,
+                      DeriveGeneric
