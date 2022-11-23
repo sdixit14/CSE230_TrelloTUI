@@ -1,20 +1,17 @@
 module Main where
 
-import Brick as B
-import Brick.Main as M (simpleMain)
+import Brick.Main as M (defaultMain)
 import Control.Monad (void)
 import Options.Applicative
 import Types
-
-ui :: B.Widget ()
-ui = B.str "Hello World"
+import Actions
+import Widgets
 
 main :: IO ()
-main =  void $ M.simpleMain ui
+main =  void $ execParser opts >>= onStart >>= M.defaultMain app
 
-input :: Parser CmdInputOptions
-input = FileInput 
-        <$> strOption
+input :: Parser FilePath
+input = strOption
           (  long "file"
             <> short 'f'
             <> metavar "FILENAME"
