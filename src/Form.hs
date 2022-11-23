@@ -56,8 +56,7 @@ mkForm =
                 label "Assignee" @@=
                     radioField assignee [ (User1, AssigneeField1, "Sumit"),
                                             (User2, AssigneeField2, "Shikha"),
-                                            (User3, AssigneeField3, "Kabir"),
-                                            (User4, AssigneeField4, "Phillip")
+                                            (User3, AssigneeField3, "Kabir")
                                             ]
                ]
 

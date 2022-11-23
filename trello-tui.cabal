@@ -39,7 +39,7 @@ executable trello-tui
   Default-Extensions: OverloadedStrings,
                       DeriveGeneric
 
-executable trello-formssss
+executable trello-form
   hs-source-dirs:     src
   ghc-options:        -threaded -Wall -Wcompat -O2
   build-depends:      base,
