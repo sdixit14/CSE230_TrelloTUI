@@ -12,14 +12,20 @@ cabal-version:       >=1.10
 
 Library
   ghc-options:        -W
-  exposed-modules:    Types
+  exposed-modules:    Types,
+                      Actions,
+                      Widgets
   Default-Extensions: OverloadedStrings,
-                      DeriveGeneric
+                      DeriveGeneric,
+                      TemplateHaskell
   build-depends:      base,
                       brick,
                       text,
                       aeson,
                       optparse-applicative,
+                      bytestring,
+                      directory,
+                      vty,
                       microlens,
                       microlens-th
   hs-source-dirs:     src
@@ -33,23 +39,14 @@ executable trello-tui
                       text,
                       aeson,
                       optparse-applicative,
+                      bytestring,
+                      directory,
+                      vty,
+                      microlens,
+                      microlens-th,
                       trello-tui
   default-language:   Haskell2010
   main-is:            Main.hs
   Default-Extensions: OverloadedStrings,
-                      DeriveGeneric
-
-executable trello-form
-  hs-source-dirs:     src
-  ghc-options:        -threaded -Wall -Wcompat -O2
-  build-depends:      base,
-                      brick,
-                      text,
-                      aeson,
-                      microlens,
-                      microlens-th,
-                      vty
-  default-language:   Haskell2010
-  main-is:            Form.hs
-  Default-Extensions: OverloadedStrings,
-                      DeriveGeneric
+                      DeriveGeneric,
+                      TemplateHaskell
