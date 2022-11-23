@@ -13,9 +13,10 @@ import Brick.Widgets.Edit         as E (editAttr, editFocusedAttr)
 import Data.List                  as L (elem, intercalate)
 import Data.Text                  as T hiding (center, null)
 import qualified Brick.Keybindings as K
+import Brick.Forms
 import Graphics.Vty               as V
 import Lens.Micro                 (each, (%~), (&), (.~), (^.), (^?))
-import Lens.Micro.Mtl ((<~))
+import Lens.Micro.Mtl ((.=))
 import Types
 import Form
 
@@ -29,8 +30,8 @@ helpText = [  "Ctrl-n         : Create Task",
 
 drawLayer :: AppState e Name -> Widget Name
 drawLayer st = widget
-  where widget  | st^.showDialog = displayDialog st
-                -- | st^.taskFlag   = getForm emptyForm  
+  where widget  | st^.showDialog  = displayDialog st
+                | st^.taskFlag =  getForm emptyForm
                 -- display all tasks in the given workspace
                 | otherwise = welcomeWidget
 
@@ -51,9 +52,12 @@ appEvent ev =
   -- d <- use dispatcher 
   case ev of
     (VtyEvent (V.EvKey V.KEsc  []))               -> M.halt -- TODO: call onExit and then Halt
-    (VtyEvent (V.EvKey (V.KChar 'n') [V.MCtrl]))  -> do
-                                                      taskFlag <~ K.handleKey _ (V.KChar 'n') [V.MCtrl]
+    (VtyEvent (V.EvKey (V.KChar 'n') [V.MCtrl]))  -> do 
+                                                      taskFlag .= True
+                                                      showDialog .= False
 
+                                                      -- AppState { _taskFlag = True }
+                                                      -- handleFormEvent ev   
     -- (VtyEvent (V.EvKey (V.KChar 'c') [V.MCtrl]))  -> onCancel st
     -- (VtyEvent (V.EvKey (V.KChar 's') [V.MCtrl]))  -> onSave st >>= M.continueWithoutRedraw
     -- (VtyEvent (V.EvKey (V.KFun 1)  []))           -> onFilter st >>= M.continueWithoutRedraw

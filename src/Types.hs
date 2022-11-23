@@ -38,7 +38,7 @@ instance FromJSON Task where
 
 data Choice = Create | Join | Save | Cancel deriving (Show)
 data Name = TitleField | ContentField | AssigneeField deriving (Show,Eq,Generic,Ord)
-data TaskShow = Taskshow deriving (Show)
+-- data TaskShow = Taskshow deriving (Show)
 data AppState e n = AppState {
     _workspaces      :: [Workspace], -- list of all workspaces in the file
     _workspace       :: Text,        -- name of the current workspace
