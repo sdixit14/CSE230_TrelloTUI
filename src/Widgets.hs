@@ -3,26 +3,24 @@ module Widgets where
 import Types
 import Actions
 import Form
-import Brick.AttrMap as A
+import Data.Aeson                 (encodeFile)
+import Brick.AttrMap              as A
 import Brick.Main                 as M
 import Brick.Types
-import Brick.Forms as F
+import Brick.Forms                as F
+import Control.Monad.IO.Class     (liftIO)
 import Brick.Util                 (on,bg)
 import Brick.Widgets.Border       (borderWithLabel)
 import Brick.Widgets.Border.Style (unicode)
 import Brick.Widgets.Center       (center)
 import Brick.Widgets.Core
-import Brick.Widgets.Dialog  as D
+import Brick.Widgets.Dialog       as D
 import Brick.Widgets.Edit         as E (editAttr, editFocusedAttr)
 import Data.List                  as L (elem, intercalate)
 import Data.Text                  as T hiding (center, null)
 import Graphics.Vty               as V
-import Lens.Micro                 (each, (%~), (&), (.~), (^.), (^?))
+import Lens.Micro                 (each, (%~), (&), (.~), (^.), (^?), (^..), filtered)
 import Lens.Micro.Mtl (preview, zoom, use, (.=), (%=))
-import Brick.Focus
-  ( focusGetCurrent
-  , focusRingCursor
-  )
 
 helpText = [  "Ctrl-n         : Create Task",
               "Ctrl-s         : Save & close dialog",
@@ -37,8 +35,7 @@ drawLayer st = widget
                 | st^.workspaceFormFlag = getWorkspaceForm (st^.workspaceForm)
                 | st^.taskFormFlag      = getTaskForm (st^.taskForm)
                 -- display all tasks in the given workspace
-                | otherwise = center (txt ( ((((st^.workspaces)!!0) ^.users)!!0)) )
-                -- | otherwise = center (txt (st^.workspace))
+                | otherwise = welcomeWidget
 
 
 welcomeWidget :: Widget Name
@@ -56,7 +53,12 @@ helpWidget st = result
 appEvent :: BrickEvent Name e -> EventM Name (AppState e Name) ()
 appEvent ev = 
   case ev of
-    (VtyEvent (V.EvKey V.KEsc  []))              -> M.halt -- TODO: call onExit and then Halt
+    -- Update the file with the current state and exit application
+    (VtyEvent (V.EvKey V.KEsc  []))              -> do
+                                                    st <- get
+                                                    liftIO (encodeFile (st^.persistFile) $ st^.workspaces)
+                                                    M.halt
+    -- In the case of Create/Join dialog box, render the Create/Join Workspace form
     (VtyEvent (V.EvKey V.KEnter  []))            -> do
                                                     st <- get
                                                     if st^.dialogFlag
@@ -64,7 +66,10 @@ appEvent ev =
                                                         taskFormFlag .= False
                                                         dialogFlag .= False
                                                         workspaceFormFlag .= True
-                                                    else return ()
+                                                       else return ()
+    -- Update the current user and current workspace in AppState based on the workspace form entries
+    -- If Dialog Selection is to Create Workspace then add a new workspace object in the list of workspaces
+    -- TODO : If Dialog Selection is to Join Workspace then append a new user to the list of users in the given workspace (identified through the current workspace)
     (VtyEvent (V.EvKey (V.KChar 's') [V.MCtrl])) -> do
                                                     st <- get                                                  
                                                     if st^.workspaceFormFlag
@@ -74,29 +79,31 @@ appEvent ev =
                                                         user .= (getFormFields wf)^.username
                                                         workspaceFormFlag .= False
                                                         let selection = show(D.dialogSelection (st^.dlg))
-                                                      
                                                         if selection == "Just Create"
                                                           then do
                                                             st <- get
                                                             workspaces %= (++[(createNewWorkspace st)])
-                                                        else return ()              
-                                                    else return ()
-
+                                                          else return ()                                                          
+                                                      else return ()
+    -- Turn off all flags and do not update state
     (VtyEvent (V.EvKey (V.KChar 'c') [V.MCtrl])) -> do
                                                     dialogFlag .= False
                                                     workspaceFormFlag .= False
                                                     taskFormFlag .= False
+    -- Turn on the task form flag which would display the Create Task form through drawUI
     (VtyEvent (V.EvKey (V.KChar 'n') [V.MCtrl])) -> do
                                                     dialogFlag .= False
                                                     workspaceFormFlag .= False
                                                     taskFormFlag .= True
+    -- Handle dialog event if the dialog flag is set to True
+    -- Handle form events if the workspace/form flag is set to True
     (VtyEvent e)                                 -> do
                                                     st <- get
                                                     if st^.dialogFlag
                                                       then zoom dlg $ handleDialogEvent e 
-                                                    else if st^.workspaceFormFlag
-                                                      then zoom workspaceForm $ handleFormEvent ev
-                                                    else zoom taskForm $ handleFormEvent ev   
+                                                      else if st^.workspaceFormFlag
+                                                        then zoom workspaceForm $ handleFormEvent ev
+                                                        else zoom taskForm $ handleFormEvent ev   
 
 drawUi :: AppState e Name ->  [Widget Name]
 drawUi st = [

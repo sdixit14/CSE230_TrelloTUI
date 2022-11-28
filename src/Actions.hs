@@ -7,11 +7,11 @@ import Brick.Types
 import Brick.Forms
 import Brick.Widgets.Core
 import Brick.Widgets.Dialog  as D
-import Data.Aeson                  (eitherDecode)
+import Data.Aeson                  (eitherDecode, encodeFile)
 import Data.ByteString.Char8 as B  (pack)
 import Data.ByteString.Lazy  as BL (fromStrict)
 import Lens.Micro ((^.))
-import Lens.Micro.Mtl (zoom, (.=))
+import Lens.Micro.Mtl (zoom, (.=), (%=))
 
 {-
   Upon application launch, fetch the list of workspaces present in the file which is parsed.
@@ -27,15 +27,6 @@ onStart path = do
       Left _           -> return $ blankAppState [] path
       Right workspaces -> return $ blankAppState workspaces path
   else do return $ blankAppState [] path
-
-
-{-
-  Upon the event of onExit, update the text file with latest allworkspaces lens
--}
-
-onExit st = do
-    -- TODO
-    return st
   
 
 blankAppState :: [Workspace] -> FilePath -> AppState e Name

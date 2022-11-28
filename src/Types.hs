@@ -43,8 +43,8 @@ data AppState e n= AppState {
     _workspace         :: Text,        -- name of the current workspace
     _user              :: User,        -- current user
     _dialogFlag        :: Bool,        -- True in Initial State, False otherwise
-    _taskFormFlag      :: Bool,        -- False in Initial State, True upon Create Workspace, Join Workspace and Create Task
-    _workspaceFormFlag :: Bool,
+    _taskFormFlag      :: Bool,        -- False in Initial State, True upon Create Task
+    _workspaceFormFlag :: Bool,        -- False in Initial State, True upon Create or Join Workspace
     _dlg               :: Dialog Choice,
     _taskForm          :: Form Task e n,
     _workspaceForm     :: Form FormFields e n,
