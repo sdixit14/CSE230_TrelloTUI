@@ -4,6 +4,7 @@ import Types
 import Form
 import System.Directory
 import Brick.Types
+import Brick.Forms
 import Brick.Widgets.Core
 import Brick.Widgets.Dialog  as D
 import Data.Aeson                  (eitherDecode)
@@ -62,5 +63,16 @@ getDialog = D.dialog (Just "Select one") (Just (0, choices)) 50
                   , ("Join Workspace", Join)
                   ]
       
+getFormFields :: Form FormFields e n -> FormFields
+getFormFields f = FormFields{
+  _wname = formState f^.wname,
+  _username = formState f^.username
+} 
 
+createNewWorkspace :: AppState e n -> Workspace
+createNewWorkspace st = Workspace {
+  _name = st^.workspace,
+  _users = [st^.user],
+  _tasks = []
+}
               

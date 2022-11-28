@@ -17,8 +17,8 @@ getTaskForm f = C.vCenter $ C.hCenter form <=> C.hCenter help
                      "Ctrl-c         : Cancel\n"
 
 emptyTaskForm = mkTaskForm Task{
-  _title="",
-  _content=""
+  _title   = "",
+  _content = ""
 }
 
 mkTaskForm :: Task -> Form Task e Name
@@ -28,7 +28,7 @@ mkTaskForm =
                 label "Content" @@= editTextField content ContentField (Just 3)
                ]
 
-getWorkspaceForm :: Form Workspace e Name -> Widget Name
+getWorkspaceForm :: Form FormFields e Name -> Widget Name
 getWorkspaceForm f = C.vCenter $ C.hCenter form <=> C.hCenter help
     where
         form = B.border $ padTop (Pad 1) $ hLimit 50 $ renderForm f
@@ -36,13 +36,14 @@ getWorkspaceForm f = C.vCenter $ C.hCenter form <=> C.hCenter help
         body = str $ "Ctrl-s         : Save\n" <>
                      "Ctrl-c         : Cancel\n"
 
-emptyWorkspaceForm = mkWorkspaceForm Workspace{
-  _name=""
+emptyWorkspaceForm = mkWorkspaceForm FormFields{
+  _wname    = "",
+  _username = ""
 }
 
-mkWorkspaceForm :: Workspace -> Form Workspace e Name
+mkWorkspaceForm :: FormFields -> Form FormFields e Name
 mkWorkspaceForm =
     let label s w = padBottom (Pad 1) $ (vLimit 1 $ hLimit 15 $ str s <+> fill ' ') <+> w
-    in newForm [label "Workspace Name" @@= editTextField name NameField (Just 1)
-                -- label "Username" @@= editTextField users UserField (Just 3)
+    in newForm [label "Workspace Name" @@= editTextField wname NameField (Just 1),
+                label "Username" @@= editTextField username UserField (Just 1)
                ]

@@ -30,10 +30,15 @@ data Task = Task {
 instance ToJSON Task where
 instance FromJSON Task where
 
+data FormFields = FormFields {
+    _wname    :: Text,
+    _username :: Text
+} deriving (Show, Generic, Eq)
+
 data Choice   = Create | Join deriving (Show, Eq, Generic, Ord)
 data Name     = TitleField | ContentField | AssigneeField | NameField | UserField deriving (Show, Eq, Generic, Ord)
 
-data AppState e n = AppState {
+data AppState e n= AppState {
     _workspaces        :: [Workspace], -- list of all workspaces in the file
     _workspace         :: Text,        -- name of the current workspace
     _user              :: User,        -- current user
@@ -42,7 +47,7 @@ data AppState e n = AppState {
     _workspaceFormFlag :: Bool,
     _dlg               :: Dialog Choice,
     _taskForm          :: Form Task e n,
-    _workspaceForm     :: Form Workspace e n,
+    _workspaceForm     :: Form FormFields e n,
     _persistFile       :: FilePath     -- path of the file where data is persisted
 }
 
@@ -50,3 +55,4 @@ makeLenses ''Workspaces
 makeLenses ''Workspace
 makeLenses ''Task
 makeLenses ''AppState
+makeLenses ''FormFields
