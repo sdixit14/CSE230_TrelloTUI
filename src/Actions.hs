@@ -38,7 +38,7 @@ blankAppState workspaces path = AppState{
                             _workspaces  = workspaces,
                             _workspace   = "",
                             _user        = "",
-                            _showDialog  = False,
+                            _showDialog  = True,
                             _persistFile = path
                           }
 

@@ -4,7 +4,7 @@ import Actions
 import Brick.AttrMap
 import Brick.Main                 as M
 import Brick.Types
-import Brick.Util                 (on)
+import Brick.Util                 (on, bg)
 import Brick.Widgets.Border       (borderWithLabel)
 import Brick.Widgets.Border.Style (unicode)
 import Brick.Widgets.Center       (center)
@@ -15,7 +15,7 @@ import Data.Text                  as T hiding (center, null)
 import Graphics.Vty               as V
 import Lens.Micro                 (each, (%~), (&), (.~), (^.), (^?))
 import Types
-
+import Brick.Widgets.Dialog as D
 
 helpText = [  "Ctrl-n         : Create Task",
               "Ctrl-s         : Save & close dialog",
@@ -74,5 +74,8 @@ app =
 theMap :: AttrMap
 theMap = attrMap V.defAttr
   [ 
-    (E.editFocusedAttr, V.white `on` V.black)
+    (E.editFocusedAttr, V.white `on` V.black),
+    (D.dialogAttr, V.white `on` V.blue)
+  , (D.buttonAttr, V.black `on` V.white)
+  , (D.buttonSelectedAttr, bg V.yellow)
   ]
