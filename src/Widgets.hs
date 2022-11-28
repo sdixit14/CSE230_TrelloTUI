@@ -27,6 +27,7 @@ helpText = [  "Ctrl-n         : Create Task",
 drawLayer :: AppState e Name -> Widget Name
 drawLayer st = widget
   where widget  | st^.showDialog = displayDialog st
+                | st^.showEditForm = displayForm st
                 -- display all tasks in the given workspace
                 | otherwise = welcomeWidget
 

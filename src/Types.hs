@@ -36,13 +36,14 @@ instance ToJSON Task where
 instance FromJSON Task where
 
 data Choice = Create | Join | Save | Cancel deriving (Show)
-data Name = TitleField | ContentField deriving (Show,Eq,Generic,Ord)
+data Name = TitleField | ContentField | EditField deriving (Show,Eq,Generic,Ord)
 
 data AppState e n = AppState {
     _workspaces      :: [Workspace], -- list of all workspaces in the file
     _workspace       :: Text,        -- name of the current workspace
     _user            :: User,        -- current user
     _showDialog      :: Bool,        -- True in Initial State, False otherwise
+    _showEditForm    :: Bool,        -- False in Initial State, True when user transitions
     _persistFile     :: FilePath     -- path of the file where data is persisted
 }
 

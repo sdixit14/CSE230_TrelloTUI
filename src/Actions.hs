@@ -5,6 +5,7 @@ import System.Directory
 import Brick.Types
 import Brick.Widgets.Core
 import Brick.Widgets.Dialog  as D
+import Brick.Widgets.Edit as E
 import Data.Aeson                  (eitherDecode)
 import Data.ByteString.Char8 as B  (pack)
 import Data.ByteString.Lazy  as BL (fromStrict)
@@ -38,7 +39,8 @@ blankAppState workspaces path = AppState{
                             _workspaces  = workspaces,
                             _workspace   = "",
                             _user        = "",
-                            _showDialog  = True,
+                            _showDialog  = False,
+                            _showEditForm = True,
                             _persistFile = path
                           }
 
@@ -64,3 +66,6 @@ getDialog = D.dialog (Just "Select one") (Just (0, choices)) 50
   Display the Form to create new Task
   Update allworkspaces lens accordingly
 -}
+displayForm :: AppState e Name -> Widget Name
+displayForm _ = padLeft (Pad 0) $ padRight Max $ padBottom Max (E.renderEditor (str . unlines) False (formContent))
+    where formContent = E.editor EditField (Just 10) "Start typing your note here" 
