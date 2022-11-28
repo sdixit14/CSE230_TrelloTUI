@@ -21,6 +21,7 @@ import Data.Text                  as T hiding (center, null)
 import Graphics.Vty               as V
 import Lens.Micro                 (each, (%~), (&), (.~), (^.), (^?), (^..), filtered)
 import Lens.Micro.Mtl (preview, zoom, use, (.=), (%=))
+import Debug.Trace
 
 helpText = [  "Ctrl-n         : Create Task",
               "Ctrl-s         : Save & close dialog",
@@ -28,6 +29,11 @@ helpText = [  "Ctrl-n         : Create Task",
               "Esc            : Save State & Exit",
               "F1             : Filter Tasks Assigned to Me"
           ]
+
+
+getCurrentUserList :: AppState e Name  -> [User]
+getCurrentUserList st = _users (Prelude.head (Prelude.filter (\wkspace -> _name wkspace == _workspace st) (_workspaces st)))
+
 
 drawLayer :: AppState e Name -> Widget Name
 drawLayer st = widget
@@ -50,14 +56,25 @@ helpWidget st = result
                                        (txtWrap $ T.pack $ L.intercalate "\n" helpText)
                | otherwise = emptyWidget
 
+filterWorkspace :: AppState e Name  -> Workspace
+filterWorkspace st = Prelude.head (Prelude.filter (\wkspace -> _name wkspace == _workspace st) (_workspaces st))
+
+
+
 appEvent :: BrickEvent Name e -> EventM Name (AppState e Name) ()
 appEvent ev = 
   case ev of
     -- Update the file with the current state and exit application
+    (VtyEvent (V.EvKey (V.KChar 'l') []))             -> do
+                                                          st <- get
+                                                          let newworkspaces = getCurrentUserList st
+                                                          liftIO (print $ newworkspaces)
+
     (VtyEvent (V.EvKey V.KEsc  []))              -> do
                                                     st <- get
                                                     liftIO (encodeFile (st^.persistFile) $ st^.workspaces)
                                                     M.halt
+
     -- In the case of Create/Join dialog box, render the Create/Join Workspace form
     (VtyEvent (V.EvKey V.KEnter  []))            -> do
                                                     st <- get
@@ -92,9 +109,16 @@ appEvent ev =
                                                     taskFormFlag .= False
     -- Turn on the task form flag which would display the Create Task form through drawUI
     (VtyEvent (V.EvKey (V.KChar 'n') [V.MCtrl])) -> do
+                                                    st <- get
                                                     dialogFlag .= False
                                                     workspaceFormFlag .= False
                                                     taskFormFlag .= True
+                                                    let l = (getCurrentUserList st)
+                                                    taskForm .= mkTaskForm l Task{
+                                                                  _title   = "",
+                                                                  _content = "",
+                                                                  _assignee = Prelude.head l
+                                                                } 
     -- Handle dialog event if the dialog flag is set to True
     -- Handle form events if the workspace/form flag is set to True
     (VtyEvent e)                                 -> do

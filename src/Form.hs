@@ -6,6 +6,7 @@ import Brick.Forms
 import Brick.Widgets.Core
 import Brick.Widgets.Border as B
 import Brick.Widgets.Center as C
+import qualified Data.Text as Data
 
 
 getTaskForm :: Form Task e Name -> Widget Name
@@ -16,16 +17,24 @@ getTaskForm f = C.vCenter $ C.hCenter form <=> C.hCenter help
         body = str $ "Ctrl-s         : Save\n" <>
                      "Ctrl-c         : Cancel\n"
 
-emptyTaskForm = mkTaskForm Task{
+emptyTaskForm = mkTaskForm [""] Task{
   _title   = "",
-  _content = ""
-}
+  _content = "",
+  _assignee = ""
+} 
 
-mkTaskForm :: Task -> Form Task e Name
-mkTaskForm =
+
+
+generateListOfTuples :: [User] -> [(User, Name, User)]
+generateListOfTuples u = map (\x -> (x, AssigneeField, x)) u
+
+mkTaskForm :: [User] -> Task  -> Form Task e Name
+mkTaskForm u =
     let label s w = padBottom (Pad 1) $ (vLimit 1 $ hLimit 15 $ str s <+> fill ' ') <+> w
     in newForm [label "Title" @@= editTextField title TitleField (Just 1),
-                label "Content" @@= editTextField content ContentField (Just 3)
+                label "Content" @@= editTextField content ContentField (Just 3),
+                label "Assigned User" @@=
+                radioField assignee (generateListOfTuples u)
                ]
 
 getWorkspaceForm :: Form FormFields e Name -> Widget Name
