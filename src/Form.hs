@@ -21,11 +21,15 @@ emptyTaskForm = mkTaskForm Task{
   _content = ""
 }
 
+-- generateListOfTuples :: [User] -> [(User, Name, User)]
+-- generateListOfTuples u = map (\x -> (x, AssigneeField, x)) u
+
 mkTaskForm :: Task -> Form Task e Name
 mkTaskForm =
     let label s w = padBottom (Pad 1) $ (vLimit 1 $ hLimit 15 $ str s <+> fill ' ') <+> w
     in newForm [label "Title" @@= editTextField title TitleField (Just 1),
                 label "Content" @@= editTextField content ContentField (Just 3)
+                -- label "Assigned User" @@= radioField assignee (generateListOfTuples u)
                ]
 
 getWorkspaceForm :: Form FormFields e Name -> Widget Name

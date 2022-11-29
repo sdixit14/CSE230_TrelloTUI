@@ -37,6 +37,7 @@ blankAppState workspaces path = AppState{
                             _dialogFlag    = True,
                             _taskFormFlag  = False,
                             _workspaceFormFlag = False,
+                            _listTasksFlag = False,
                             _dlg           = getDialog,
                             _taskForm      = emptyTaskForm,
                             _workspaceForm = emptyWorkspaceForm,

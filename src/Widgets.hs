@@ -3,6 +3,7 @@ module Widgets where
 import Types
 import Actions
 import Form
+import Tasks
 import Data.Aeson                 (encodeFile)
 import Brick.AttrMap              as A
 import Brick.Main                 as M
@@ -34,6 +35,7 @@ drawLayer st = widget
   where widget  | st^.dialogFlag        = displayDialog st
                 | st^.workspaceFormFlag = getWorkspaceForm (st^.workspaceForm)
                 | st^.taskFormFlag      = getTaskForm (st^.taskForm)
+                | st^.listTasksFlag     = scrollabletaskWidget st
                 -- display all tasks in the given workspace
                 | otherwise = welcomeWidget
 
@@ -49,6 +51,10 @@ helpWidget st = result
                                        padBottom Max
                                        (txtWrap $ T.pack $ L.intercalate "\n" helpText)
                | otherwise = emptyWidget
+
+getCurrentUserList :: AppState e Name  -> [User]
+getCurrentUserList st = _users (Prelude.head (Prelude.filter (\wkspace -> _name wkspace == _workspace st) (_workspaces st)))
+
 
 appEvent :: BrickEvent Name e -> EventM Name (AppState e Name) ()
 appEvent ev = 
@@ -83,7 +89,19 @@ appEvent ev =
                                                           then do
                                                             st <- get
                                                             workspaces %= (++[(createNewWorkspace st)])
-                                                          else return ()                                                          
+                                                            listTasksFlag .= True
+                                                          else do
+                                                            st <- get
+                                                            zoom (workspaces.each) $ do
+                                                              workspace_name <- use name
+                                                              if (st^.workspace == workspace_name)
+                                                                then do 
+                                                                  let usersList = getCurrentUserList st
+                                                                  if ((st^.user) `elem` usersList)
+                                                                    then users %= (++[])
+                                                                  else users %= (++[st^.user])
+                                                              else users %= (++[])
+                                                            listTasksFlag .= True                                                        
                                                       else return ()
     -- Turn off all flags and do not update state
     (VtyEvent (V.EvKey (V.KChar 'c') [V.MCtrl])) -> do
@@ -95,6 +113,7 @@ appEvent ev =
                                                     dialogFlag .= False
                                                     workspaceFormFlag .= False
                                                     taskFormFlag .= True
+                                                    
     -- Handle dialog event if the dialog flag is set to True
     -- Handle form events if the workspace/form flag is set to True
     (VtyEvent e)                                 -> do
