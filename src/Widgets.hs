@@ -55,6 +55,8 @@ helpWidget st = result
 getCurrentUserList :: AppState e Name  -> [User]
 getCurrentUserList st = _users (Prelude.head (Prelude.filter (\wkspace -> _name wkspace == _workspace st) (_workspaces st)))
 
+getCurrentTaskList :: AppState e Name  -> [Task]
+getCurrentTaskList st = _tasks (Prelude.head (Prelude.filter (\wkspace -> wkspace^.name == st^.workspace) (st^.workspaces)))
 
 appEvent :: BrickEvent Name e -> EventM Name (AppState e Name) ()
 appEvent ev = 
@@ -89,19 +91,23 @@ appEvent ev =
                                                           then do
                                                             st <- get
                                                             workspaces %= (++[(createNewWorkspace st)])
-                                                            listTasksFlag .= True
-                                                          else do
-                                                            st <- get
-                                                            zoom (workspaces.each) $ do
-                                                              workspace_name <- use name
-                                                              if (st^.workspace == workspace_name)
-                                                                then do 
-                                                                  let usersList = getCurrentUserList st
-                                                                  if ((st^.user) `elem` usersList)
-                                                                    then users %= (++[])
-                                                                  else users %= (++[st^.user])
-                                                              else users %= (++[])
-                                                            listTasksFlag .= True                                                        
+
+                                                        else do
+                                                          st <- get
+                                                          zoom (workspaces.each) $ do
+                                                            workspace_name <- use name
+                                                            if (st^.workspace == workspace_name)
+                                                              then do 
+                                                                let usersList = getCurrentUserList st
+                                                                if ((st^.user) `elem` usersList)
+                                                                  then users %= (++[])
+                                                                else users %= (++[st^.user])
+                                                            else users %= (++[])
+                                                        st <- get
+                                                        let tasksList = getCurrentTaskList st
+                                                        if (null tasksList)
+                                                          then listTasksFlag .= False
+                                                        else listTasksFlag .= True                                                         
                                                       else return ()
     -- Turn off all flags and do not update state
     (VtyEvent (V.EvKey (V.KChar 'c') [V.MCtrl])) -> do
