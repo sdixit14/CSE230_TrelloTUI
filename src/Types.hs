@@ -36,7 +36,7 @@ data FormFields = FormFields {
 } deriving (Show, Generic, Eq)
 
 data Choice   = Create | Join deriving (Show, Eq, Generic, Ord)
-data Name     = TitleField | ContentField | AssigneeField | NameField | UserField deriving (Show, Eq, Generic, Ord)
+data Name     = TitleField | ContentField | AssigneeField | NameField | RadioField User | UserField deriving (Show, Eq, Generic, Ord)
 
 data AppState e n= AppState {
     _workspaces        :: [Workspace], -- list of all workspaces in the file

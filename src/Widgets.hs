@@ -116,10 +116,17 @@ appEvent ev =
                                                     taskFormFlag .= False
     -- Turn on the task form flag which would display the Create Task form through drawUI
     (VtyEvent (V.EvKey (V.KChar 'n') [V.MCtrl])) -> do
-                                                    dialogFlag .= False
-                                                    workspaceFormFlag .= False
-                                                    taskFormFlag .= True
-                                                    
+                                                      st <- get
+                                                      dialogFlag .= False
+                                                      workspaceFormFlag .= False
+                                                      taskFormFlag .= True
+                                                      let l = (getCurrentUserList st)
+                                                      taskForm .= mkTaskForm l Task{
+                                                                    _title   = "",
+                                                                    _content = "",
+                                                                    _assignee = ""
+                                                                  } 
+                                                      
     -- Handle dialog event if the dialog flag is set to True
     -- Handle form events if the workspace/form flag is set to True
     (VtyEvent e)                                 -> do

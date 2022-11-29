@@ -16,20 +16,21 @@ getTaskForm f = C.vCenter $ C.hCenter form <=> C.hCenter help
         body = str $ "Ctrl-s         : Save\n" <>
                      "Ctrl-c         : Cancel\n"
 
-emptyTaskForm = mkTaskForm Task{
+emptyTaskForm = mkTaskForm [""] Task{
   _title   = "",
-  _content = ""
+  _content = "",
+  _assignee = ""
 }
 
--- generateListOfTuples :: [User] -> [(User, Name, User)]
--- generateListOfTuples u = map (\x -> (x, AssigneeField, x)) u
+generateListOfTuples :: [User] -> [(User, Name, User)]
+generateListOfTuples u = map (\x -> (x, RadioField x, x)) u
 
-mkTaskForm :: Task -> Form Task e Name
-mkTaskForm =
+mkTaskForm :: [User] -> Task -> Form Task e Name
+mkTaskForm u =
     let label s w = padBottom (Pad 1) $ (vLimit 1 $ hLimit 15 $ str s <+> fill ' ') <+> w
     in newForm [label "Title" @@= editTextField title TitleField (Just 1),
-                label "Content" @@= editTextField content ContentField (Just 3)
-                -- label "Assigned User" @@= radioField assignee (generateListOfTuples u)
+                label "Content" @@= editTextField content ContentField (Just 3),
+                label "Assigned User" @@= radioField assignee (generateListOfTuples u)
                ]
 
 getWorkspaceForm :: Form FormFields e Name -> Widget Name
