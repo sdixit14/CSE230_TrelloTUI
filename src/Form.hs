@@ -26,7 +26,7 @@ emptyTaskForm = mkTaskForm [""] Task{
 
 
 generateListOfTuples :: [User] -> [(User, Name, User)]
-generateListOfTuples u = map (\x -> (x, AssigneeField, x)) u
+generateListOfTuples u = map (\x -> (x, RadioField x, x)) u
 
 mkTaskForm :: [User] -> Task  -> Form Task e Name
 mkTaskForm u =

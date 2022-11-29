@@ -117,7 +117,7 @@ appEvent ev =
                                                     taskForm .= mkTaskForm l Task{
                                                                   _title   = "",
                                                                   _content = "",
-                                                                  _assignee = Prelude.head l
+                                                                  _assignee = ""
                                                                 } 
     -- Handle dialog event if the dialog flag is set to True
     -- Handle form events if the workspace/form flag is set to True
