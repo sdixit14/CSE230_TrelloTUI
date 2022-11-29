@@ -1,6 +1,6 @@
 module Main where
 
-import Brick.Main as M (defaultMain, customMain)
+import Brick.Main as M (defaultMain)
 import Control.Monad (void)
 import Options.Applicative
 import Types

@@ -53,19 +53,3 @@ executable trello-tui
   Default-Extensions: OverloadedStrings,
                       DeriveGeneric,
                       TemplateHaskell
-
--- executable trello-form
---   hs-source-dirs:     src
---   ghc-options:        -threaded -Wall -Wcompat -O2
---   build-depends:      base,
---                       brick,
---                       text,
---                       aeson,
---                       microlens,
---                       microlens-th,
---                       vty
---   default-language:   Haskell2010
---   main-is:            Form.hs
---   Default-Extensions: OverloadedStrings,
---                       DeriveGeneric
---                       TemplateHaskell
