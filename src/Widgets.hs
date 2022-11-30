@@ -3,12 +3,12 @@ module Widgets where
 import Types
 import Actions
 import Form
+import Tasks
 import Data.Aeson                 (encodeFile)
 import Brick.AttrMap              as A
 import Brick.Main                 as M
 import Brick.Types
-import Brick.Forms                as F
-import Control.Monad.IO.Class     (liftIO)
+import Brick.Forms
 import Brick.Util                 (on,bg)
 import Brick.Widgets.Border       (borderWithLabel)
 import Brick.Widgets.Border.Style (unicode)
@@ -19,29 +19,24 @@ import Brick.Widgets.Edit         as E (editAttr, editFocusedAttr)
 import Data.List                  as L (elem, intercalate)
 import Data.Text                  as T hiding (center, null)
 import Graphics.Vty               as V
-import Lens.Micro                 (each, (%~), (&), (.~), (^.), (^?), (^..), filtered)
-import Lens.Micro.Mtl (preview, zoom, use, (.=), (%=))
-import Debug.Trace
+import Lens.Micro                 (each, (^.))
+import Lens.Micro.Mtl              (zoom, use, (.=), (%=))
 
-helpText = [  "Ctrl-n         : Create Task",
-              "Ctrl-s         : Save & close dialog",
-              "Ctrl-c         : Cancel Dialog",
-              "Esc            : Save State & Exit",
-              "F1             : Filter Tasks Assigned to Me"
-          ]
-
-
-getCurrentUserList :: AppState e Name  -> [User]
-getCurrentUserList st = _users (Prelude.head (Prelude.filter (\wkspace -> _name wkspace == _workspace st) (_workspaces st)))
-
+helpText = [  "Ctrl-n    : Create Task",
+              "Ctrl-s    : Save & Close Dialog",
+              "Ctrl-c    : Cancel Dialog",
+              "Ctrl-f    : Tasks Assigned to Me",
+              "Ctrl-a    : Remove Filter",
+              "Esc       : Save State & Exit"
+            ]
 
 drawLayer :: AppState e Name -> Widget Name
 drawLayer st = widget
   where widget  | st^.dialogFlag        = displayDialog st
                 | st^.workspaceFormFlag = getWorkspaceForm (st^.workspaceForm)
                 | st^.taskFormFlag      = getTaskForm (st^.taskForm)
-                -- display all tasks in the given workspace
-                | otherwise = welcomeWidget
+                | st^.listTasksFlag     = scrollabletaskWidget st
+                | otherwise             = welcomeWidget
 
 
 welcomeWidget :: Widget Name
@@ -50,84 +45,23 @@ welcomeWidget = center (txt "Welcome to Trello-TUI")
 helpWidget :: AppState e Name -> Widget Name
 helpWidget st = result
   where result | not(st^.dialogFlag) = borderWithLabel (str "Help") $
-                                       hLimitPercent 15  $
+                                       hLimitPercent 18  $
                                        vLimitPercent 100 $
                                        padBottom Max
                                        (txtWrap $ T.pack $ L.intercalate "\n" helpText)
                | otherwise = emptyWidget
 
-filterWorkspace :: AppState e Name  -> Workspace
-filterWorkspace st = Prelude.head (Prelude.filter (\wkspace -> _name wkspace == _workspace st) (_workspaces st))
-
-
-
 appEvent :: BrickEvent Name e -> EventM Name (AppState e Name) ()
 appEvent ev = 
   case ev of
-    -- Update the file with the current state and exit application
-    (VtyEvent (V.EvKey (V.KChar 'l') []))             -> do
-                                                          st <- get
-                                                          let newworkspaces = getCurrentUserList st
-                                                          liftIO (print $ newworkspaces)
-
-    (VtyEvent (V.EvKey V.KEsc  []))              -> do
-                                                    st <- get
-                                                    liftIO (encodeFile (st^.persistFile) $ st^.workspaces)
-                                                    M.halt
-
-    -- In the case of Create/Join dialog box, render the Create/Join Workspace form
-    (VtyEvent (V.EvKey V.KEnter  []))            -> do
-                                                    st <- get
-                                                    if st^.dialogFlag
-                                                      then do
-                                                        taskFormFlag .= False
-                                                        dialogFlag .= False
-                                                        workspaceFormFlag .= True
-                                                       else return ()
-    -- Update the current user and current workspace in AppState based on the workspace form entries
-    -- If Dialog Selection is to Create Workspace then add a new workspace object in the list of workspaces
-    -- TODO : If Dialog Selection is to Join Workspace then append a new user to the list of users in the given workspace (identified through the current workspace)
-    (VtyEvent (V.EvKey (V.KChar 's') [V.MCtrl])) -> do
-                                                    st <- get                                                  
-                                                    if st^.workspaceFormFlag
-                                                      then do
-                                                        wf <- use workspaceForm                                                       
-                                                        workspace .= (getFormFields wf)^.wname
-                                                        user .= (getFormFields wf)^.username
-                                                        workspaceFormFlag .= False
-                                                        let selection = show(D.dialogSelection (st^.dlg))
-                                                        if selection == "Just Create"
-                                                          then do
-                                                            st <- get
-                                                            workspaces %= (++[(createNewWorkspace st)])
-                                                          else return ()                                                          
-                                                      else return ()
-    -- Turn off all flags and do not update state
-    (VtyEvent (V.EvKey (V.KChar 'c') [V.MCtrl])) -> do
-                                                    dialogFlag .= False
-                                                    workspaceFormFlag .= False
-                                                    taskFormFlag .= False
-    -- Turn on the task form flag which would display the Create Task form through drawUI
-    (VtyEvent (V.EvKey (V.KChar 'n') [V.MCtrl])) -> do
-                                                    st <- get
-                                                    dialogFlag .= False
-                                                    workspaceFormFlag .= False
-                                                    taskFormFlag .= True
-                                                    let l = (getCurrentUserList st)
-                                                    taskForm .= mkTaskForm l Task{
-                                                                  _title   = "",
-                                                                  _content = "",
-                                                                  _assignee = ""
-                                                                } 
-    -- Handle dialog event if the dialog flag is set to True
-    -- Handle form events if the workspace/form flag is set to True
-    (VtyEvent e)                                 -> do
-                                                    st <- get
-                                                    if st^.dialogFlag
-                                                      then zoom dlg $ handleDialogEvent e 
-                                                      else if st^.workspaceFormFlag
-                                                        then zoom workspaceForm $ handleFormEvent ev
-                                                        else zoom taskForm $ handleFormEvent ev   
+    (VtyEvent (V.EvKey V.KEsc  []))              -> get >>= onExit
+    (VtyEvent (V.EvKey V.KEnter  []))            -> get >>= onEnter
+    (VtyEvent (V.EvKey (V.KChar 's') [V.MCtrl])) -> get >>= onSave
+    (VtyEvent (V.EvKey (V.KChar 'c') [V.MCtrl])) -> get >>= onCancel
+    (VtyEvent (V.EvKey (V.KChar 'n') [V.MCtrl])) -> get >>= onCreateTask
+    (VtyEvent (V.EvKey (V.KChar 'f') [V.MCtrl])) -> filterTasksFlag .= True
+    (VtyEvent (V.EvKey (V.KChar 'a') [V.MCtrl])) -> filterTasksFlag .= False
+    (VtyEvent e)                                 -> get >>= onTyping e ev
 
 drawUi :: AppState e Name ->  [Widget Name]
 drawUi st = [
@@ -149,11 +83,11 @@ app =
 
 theMap :: AttrMap
 theMap = A.attrMap V.defAttr
-   [  (D.dialogAttr, V.white `on` V.blue)
-    , (D.buttonAttr, V.black `on` V.white)
+   [  (D.dialogAttr,         V.white `on` V.blue)
+    , (D.buttonAttr,         V.black `on` V.white)
     , (D.buttonSelectedAttr, bg V.yellow)
-    , (E.editAttr, V.white `on` V.black)
-    , (E.editFocusedAttr, V.black `on` V.yellow)
+    , (E.editAttr,           V.white `on` V.black)
+    , (E.editFocusedAttr,    V.black `on` V.yellow)
     , (invalidFormInputAttr, V.white `on` V.red)
     , (focusedFormInputAttr, V.black `on` V.yellow)
     ]
