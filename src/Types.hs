@@ -45,6 +45,8 @@ data AppState e n= AppState {
     _dialogFlag        :: Bool,        -- True in Initial State, False otherwise
     _taskFormFlag      :: Bool,        -- False in Initial State, True upon Create Task
     _workspaceFormFlag :: Bool,        -- False in Initial State, True upon Create or Join Workspace
+    _listTasksFlag     :: Bool,        -- False in Intial State, True after user creates/joins workspace
+    _filterTasksFlag   :: Bool,        -- False in Intial State, True upon the event of filter tasks
     _dlg               :: Dialog Choice,
     _taskForm          :: Form Task e n,
     _workspaceForm     :: Form FormFields e n,

@@ -15,7 +15,8 @@ Library
   exposed-modules:    Types,
                       Actions,
                       Widgets,
-                      Form
+                      Form,
+                      Tasks
   Default-Extensions: OverloadedStrings,
                       DeriveGeneric,
                       TemplateHaskell
@@ -23,6 +24,7 @@ Library
                       brick,
                       text,
                       aeson,
+                      split,
                       optparse-applicative,
                       bytestring,
                       directory,
@@ -40,6 +42,7 @@ executable trello-tui
                       brick,
                       text,
                       aeson,
+                      split,
                       optparse-applicative,
                       bytestring,
                       directory,
