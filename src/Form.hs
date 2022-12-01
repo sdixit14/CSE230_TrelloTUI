@@ -9,9 +9,9 @@ import Brick.Widgets.Center as C
 
 
 getTaskForm :: Form Task e Name -> Widget Name
-getTaskForm f = C.vCenter $ C.hCenter form <=> C.hCenter help
+getTaskForm f = (C.vCenter $ C.hCenter form <=> C.hCenter help)
     where
-        form = B.border $ padTop (Pad 1) $ hLimit 50 $ renderForm f
+        form = borderWithLabel (str "Create Task") (padTop (Pad 1) $ hLimit 50 $ renderForm f)
         help = padTop (Pad 1) $ B.borderWithLabel (str "Help") body
         body = str $ "Ctrl-s         : Save\n" <>
                      "Ctrl-c         : Cancel\n"
@@ -36,10 +36,10 @@ mkTaskForm u =
 getWorkspaceForm :: Form FormFields e Name -> Widget Name
 getWorkspaceForm f = C.vCenter $ C.hCenter form <=> C.hCenter help
     where
-        form = B.border $ padTop (Pad 1) $ hLimit 50 $ renderForm f
+        form = borderWithLabel (str "Enter Workspace Details") (padTop (Pad 1) $ hLimit 50 $ renderForm f)
         help = padTop (Pad 1) $ B.borderWithLabel (str "Help") body
-        body = str $ "Ctrl-s         : Save\n" <>
-                     "Ctrl-c         : Cancel\n"
+        body = str $ "Ctrl-s : Save\n" <>
+                     "Ctrl-c : Cancel\n"
 
 emptyWorkspaceForm = mkWorkspaceForm FormFields{
   _wname    = "",
