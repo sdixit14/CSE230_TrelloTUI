@@ -52,12 +52,12 @@ onSave st = do
       if selection == "Just Create"
         then get >>= onCreateWorkspace
         else get >>= onJoinWorkspace
-      st <- get
-      let tasksList = getCurrentTaskList st
-      if (null tasksList)
-        then listTasksFlag .= False
-      else listTasksFlag .= True                                                         
-    else get >>= onSaveTask
+  else get >>= onSaveTask
+  st <- get
+  let tasksList = getCurrentTaskList st
+  if (null tasksList)
+    then listTasksFlag .= False
+    else listTasksFlag .= True                                                         
 
 onCancel :: AppState e Name -> EventM Name (AppState e Name) ()
 onCancel st = do
@@ -123,7 +123,7 @@ blankAppState workspaces path = AppState{
 
 displayDialog :: AppState e Name -> Widget Name
 displayDialog st = padLeft (Pad 0) $ padRight Max $ padBottom Max dlgContent
-    where dlgContent = D.renderDialog (st^.dlg) $ str "What would you like to do?"
+    where dlgContent = D.renderDialog (st^.dlg) $ str " "
 
 getDialog :: D.Dialog Choice
 getDialog = D.dialog (Just "Select one") (Just (0, choices)) 50
@@ -142,7 +142,7 @@ getCurrentUserList :: AppState e Name  -> [User]
 getCurrentUserList st = _users (Prelude.head (Prelude.filter (\wkspace -> _name wkspace == _workspace st) (_workspaces st)))
 
 getCurrentTaskList :: AppState e Name  -> [Task]
-getCurrentTaskList st = _tasks (Prelude.head (Prelude.filter (\wkspace -> wkspace^.name == st^.workspace) (st^.workspaces)))
+getCurrentTaskList st = _tasks (Prelude.head (Prelude.filter (\wkspace -> _name wkspace == _workspace st) (_workspaces st)))
 
 createNewWorkspace :: AppState e n -> Workspace
 createNewWorkspace st = Workspace {

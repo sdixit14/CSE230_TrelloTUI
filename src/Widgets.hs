@@ -83,10 +83,9 @@ app =
 
 theMap :: AttrMap
 theMap = A.attrMap V.defAttr
-   [  (D.dialogAttr,         V.white `on` V.blue)
-    , (D.buttonAttr,         V.black `on` V.white)
+   [  (D.buttonAttr,         V.black `on` V.white)
     , (D.buttonSelectedAttr, bg V.yellow)
-    , (E.editAttr,           V.white `on` V.black)
+    , (E.editAttr,           V.black `on` V.white)
     , (E.editFocusedAttr,    V.black `on` V.yellow)
     , (invalidFormInputAttr, V.white `on` V.red)
     , (focusedFormInputAttr, V.black `on` V.yellow)

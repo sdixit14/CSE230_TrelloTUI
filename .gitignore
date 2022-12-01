@@ -1,6 +1,5 @@
 .stack-work/
 dist-newstyle
 /stack.yaml.lock
-file.txt
-file.json
+*.json
 .DS_Store
