@@ -56,3 +56,17 @@ executable trello-tui
   Default-Extensions: OverloadedStrings,
                       DeriveGeneric,
                       TemplateHaskell
+
+Test-Suite test-trello
+  type:               exitcode-stdio-1.0
+  main-is:            Main.hs
+  hs-source-dirs:     test
+  build-depends:      base,
+                      test-framework,
+                      test-framework-hunit,
+                      HUnit,
+                      tasty,
+                      tasty-hunit,
+                      trello-tui,
+                      text,
+                      tasty-expected-failure

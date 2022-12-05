@@ -28,12 +28,15 @@ scrollabletaskWidget s =
         render $ vLimitPercent 100 $ taskWidgets totalWidth s
 
 
+getMyTasks st fl = Prelude.filter (\x -> st^.user == x^.assignee)(((fl)!!0)^.tasks)
+getMyWorkspace st = Prelude.filter (\x -> (st^.workspace == x^.name)) (st^.workspaces)
+
 taskWidgets :: Int -> AppState e Name -> Widget Name
 taskWidgets width st = padLeft (Pad 0) $ padRight Max $ padBottom Max $
   withBorderStyle unicode widgetLayout
     where rows = L.transpose $ splitNotes width 35 val
-          filterList = Prelude.filter (\x -> (st^.workspace == x^.name)) (st^.workspaces)
-          val | st^.filterTasksFlag = Prelude.filter (\x -> st^.user == x^.assignee)(((filterList)!!0)^.tasks)
+          filterList = getMyWorkspace st
+          val | st^.filterTasksFlag = getMyTasks st filterList
               | otherwise = (((filterList)!!0)^.tasks)
           widgetLayout =  hBox $ L.map (vBox . L.map taskUI) rows
           splitNotes totWidth taskWidth = chunksOf $ totWidth `div` taskWidth
